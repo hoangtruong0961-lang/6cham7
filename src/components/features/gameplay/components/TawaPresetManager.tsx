@@ -217,6 +217,7 @@ export default function TawaPresetManager({
   initialPreset,
   playerName,
   charName,
+  activeWorld,
 }: TawaPresetManagerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<
