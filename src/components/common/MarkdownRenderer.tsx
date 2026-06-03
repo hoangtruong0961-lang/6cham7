@@ -689,6 +689,8 @@ ${code}
   branches: ({ children }) => <span className="hidden" aria-hidden="true">{children}</span>,
   choices: ({ children }) => <span className="hidden" aria-hidden="true">{children}</span>,
   actions: ({ children }) => <span className="hidden" aria-hidden="true">{children}</span>,
+  meow_FM: ({ children }) => <span className="hidden" aria-hidden="true">{children}</span>,
+  meow_fm: ({ children }) => <span className="hidden" aria-hidden="true">{children}</span>,
   snow: ({ children }) => <span className="hidden" aria-hidden="true">{children}</span>,
   ice: ({ children }) => <span className="hidden" aria-hidden="true">{children}</span>,
   prologue: ({ children }) => <span className="hidden" aria-hidden="true">{children}</span>,

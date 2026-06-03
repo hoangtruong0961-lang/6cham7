@@ -401,7 +401,24 @@ export const cleanRawText = (text: string): string => {
   
   const absoluteOriginal = text.trim();
 
-  let cleaned = text;
+  // 0. Bảo vệ code blocks, sandboxes, và full HTML documents khỏi bị làm sạch hoặc lọc dòng
+  const protectedCodeBlocks: string[] = [];
+  let cleaned = text.replace(/```[\s\S]*?```/g, (match) => {
+    protectedCodeBlocks.push(match);
+    return `__SYS_CODEBLOCK_PROTECTED_${protectedCodeBlocks.length - 1}__`;
+  });
+
+  const protectedFullDocs: string[] = [];
+  cleaned = cleaned.replace(/<!DOCTYPE\s+html>[\s\S]*?(?:<\/html>|$)|<\s*html\b[\s\S]*?(?:<\/html>|$)/gi, (match) => {
+    protectedFullDocs.push(match);
+    return `__SYS_FULLDOC_PROTECTED_${protectedFullDocs.length - 1}__`;
+  });
+
+  const protectedSandboxes: string[] = [];
+  cleaned = cleaned.replace(/<sandbox>([\s\S]*?)(?:<\/sandbox>|$)/gi, (match) => {
+    protectedSandboxes.push(match);
+    return `__SYS_SANDBOX_PROTECTED_${protectedSandboxes.length - 1}__`;
+  });
 
   // Danh sách các thẻ hệ thống cần loại bỏ hoàn toàn (bao gồm cả nội dung bên trong)
   const tagsToRemove = [
@@ -410,6 +427,8 @@ export const cleanRawText = (text: string): string => {
     'thinhking', // Typos
     'thought',
     'thoughts',
+    'meow_FM',
+    'meow_fm',
     'table_stored',
     'tableEdit',
     'branches',
@@ -418,7 +437,6 @@ export const cleanRawText = (text: string): string => {
     'memory_table_guide',
     'user_input',
     'word_count',
-    'details',
     'set_time',
     'time_cost',
     'incrementalSummary',
@@ -647,6 +665,19 @@ export const cleanRawText = (text: string): string => {
   });
 
   cleaned = filteredLines.join('\n').trim();
+
+  // Khôi phục lại các khối bảo vệ ban đầu
+  protectedSandboxes.forEach((block, index) => {
+    cleaned = cleaned.replace(`__SYS_SANDBOX_PROTECTED_${index}__`, () => block);
+  });
+
+  protectedFullDocs.forEach((block, index) => {
+    cleaned = cleaned.replace(`__SYS_FULLDOC_PROTECTED_${index}__`, () => block);
+  });
+
+  protectedCodeBlocks.forEach((block, index) => {
+    cleaned = cleaned.replace(`__SYS_CODEBLOCK_PROTECTED_${index}__`, () => block);
+  });
 
   // FALLBACK: Nếu sau khi lọc mà không còn gì, nhưng trước đó có văn bản, hãy trả về văn bản trước khi lọc
   // Điều này giúp tránh việc hiển thị "Nội dung truyện trống" khi AI viết truyện nhưng bị nhầm là hệ thống
